@@ -6,10 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 @Repository
 public interface IProductoRepository extends JpaRepository<Producto, Long> {
     // Retorna productos de acuerdo a su categoria
     // Select * FROM producto WHERE categoria = ?
     Page<Producto> findByCategoriaOrderByPrecioAsc(String categoria, Pageable pageable);
+
+    //List<Producto> findByCategoriaOrderByPrecioAsc(String categoria);
 }

@@ -1,7 +1,9 @@
 package cl.ubiobio.spf.Service.jpa;
 
 import cl.ubiobio.spf.Entity.Pedido;
+import cl.ubiobio.spf.Entity.Producto;
 import cl.ubiobio.spf.Repository.IPedidoRepository;
+import cl.ubiobio.spf.Repository.IProductoRepository;
 import cl.ubiobio.spf.Service.IPedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,9 @@ public class PedidoService implements IPedidoService {
 
     @Autowired
     private IPedidoRepository pedidoRepository;
+
+    @Autowired
+    private IProductoRepository productoRepository;
 
     // Guardar un nuevo pedido
     @Override
@@ -75,8 +80,8 @@ public class PedidoService implements IPedidoService {
             );
 
             // Actualiza el estado pediente
-            if (pedidoToUpdate.getPendiente() != pedido.getPendiente()) pedidoToUpdate.setPendiente(
-                    pedido.getPendiente()
+            if (pedidoToUpdate.isPendiente() != pedido.isPendiente()) pedidoToUpdate.setPendiente(
+                    pedido.isPendiente()
             );
 
             pedidoRepository.save(pedidoToUpdate);
@@ -90,6 +95,21 @@ public class PedidoService implements IPedidoService {
     @Transactional
     public void deletePedido(Long idPedido) {
         pedidoRepository.deleteById(idPedido);
+    }
+
+    // Restar el stock de los productos venta rapida
+    @Override
+    public List<Producto> rapida(List<Producto> productos) {
+
+        for (int i=0;i<productos.size();i++){
+
+            Producto productoNuevoStock = productos.get(i);
+            Producto productoViejoStock = productoRepository.findById(productoNuevoStock.getCodigo()).orElse(null);
+            productoViejoStock.setStock(productoNuevoStock.getStock());
+            productoRepository.save(productoNuevoStock);
+
+        }
+        return productos;
     }
 
 }

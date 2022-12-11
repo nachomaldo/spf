@@ -5,6 +5,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "Producto")
@@ -12,7 +13,7 @@ public class Producto implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "codigo", nullable = false, updatable = false)
+    @Column(name = "codigo", nullable = false, updatable = false, unique = false)
     private Long codigo;
 
     @NotEmpty
@@ -33,14 +34,25 @@ public class Producto implements Serializable {
     @Size(min = 3, max = 30)
     private String categoria;
 
+    private String imageName;
+
+    @Lob
+    private byte[] imageBytes;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "productos")
+    private List<Pedido> pedidos;
+
     public Producto(){}
 
-    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria) {
+    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria, String imageName,
+                    byte[] imageBytes) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
         this.descripcion = descripcion;
         this.categoria = categoria;
+        this.imageName = imageName;
+        this.imageBytes = imageBytes;
     }
 
     public Long getCodigo() {
@@ -85,5 +97,21 @@ public class Producto implements Serializable {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
+
+    public void setImageBytes(byte[] imageBytes) {
+        this.imageBytes = imageBytes;
     }
 }

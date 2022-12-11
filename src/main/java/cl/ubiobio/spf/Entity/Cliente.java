@@ -1,5 +1,7 @@
 package cl.ubiobio.spf.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -7,6 +9,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.*;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Cliente")
@@ -44,11 +48,23 @@ public class Cliente implements Serializable {
 
     private String estado;
 
+    // Pedidos del cliente
+    @JsonIgnoreProperties(value = {"cliente", "hibernateLazyInitializer", "handler"}, allowSetters = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Pedido> pedidos;
+
+    // Deudas del cliente
+    @JsonIgnoreProperties(value = {"cliente", "hibernateLazyInitializer", "handler"}, allowSetters = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Deuda> deudas;
+
     public Cliente() {
-       // this.pedidos = new ArrayList<>();
+        this.pedidos = new ArrayList<>();
+        this.deudas = new ArrayList<>();
     }
 
-    public Cliente(Long idCliente, String nombre, String apellido, String telefono, String direccion, String email, String estado) {
+    public Cliente(Long idCliente, String nombre, String apellido, String telefono, String direccion, String email,
+                   String estado, List<Pedido> pedidos, List<Deuda> deudas) {
         this.idCliente = idCliente;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -56,6 +72,8 @@ public class Cliente implements Serializable {
         this.direccion = direccion;
         this.email = email;
         this.estado = estado;
+        this.pedidos = new ArrayList<>();
+        this.deudas = new ArrayList<>();
     }
 
     @PrePersist
@@ -114,5 +132,21 @@ public class Cliente implements Serializable {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public List<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
+
+    public List<Deuda> getDeudas() {
+        return deudas;
+    }
+
+    public void setDeudas(List<Deuda> deudas) {
+        this.deudas = deudas;
     }
 }

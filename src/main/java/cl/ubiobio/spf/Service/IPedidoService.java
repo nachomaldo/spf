@@ -1,6 +1,7 @@
 package cl.ubiobio.spf.Service;
 
 import cl.ubiobio.spf.Entity.Pedido;
+import cl.ubiobio.spf.Entity.Producto;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -22,4 +23,6 @@ public interface IPedidoService {
 
     //Eliminar un pedido
     void deletePedido (Long idPedido);
+
+    List<Producto> rapida(List<Producto> productos);
 }

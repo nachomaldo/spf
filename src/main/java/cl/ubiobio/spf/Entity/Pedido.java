@@ -5,10 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Pedido")
@@ -32,28 +33,44 @@ public class Pedido implements Serializable {
     private String direccionDeReparto;
 
     @NotNull//SUMAR PRECIO DE PRODUCTO
-    //@Pattern(regexp = "^(?!0*(\\.0+)?$)(\\d+|\\d*\\.\\d+)$")
     private Long total;
 
-    //0 = PENDIENTE
-    //1 = ENTREGADO
-    @NotNull
+    // true = PENDIENTE
+    // false = ENTREGADO
     @Column(name = "pendiente")
-    private int pendiente;
+    private boolean pendiente;
 
-    public Pedido(){}
+    @JsonIgnoreProperties({"pedidos", "hibernateLazyInitializer", "handler"})
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente")
+    private Cliente cliente;
 
-    public Pedido(String nombreDelReceptor, LocalDate fecha, String direccionDeReparto, Long total, int pendiente){
+    // Productos del pedido
+    //@JsonIgnoreProperties(value = {"pedido", "hibernateLazyInitializer", "handler"}, allowSetters = true)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "pedido_producto",
+            joinColumns = @JoinColumn(name = "id_pedido"),
+            inverseJoinColumns = @JoinColumn(name = "codigo"))
+    private List<Producto> productos;
+
+    public Pedido() { }
+
+    public Pedido(String nombreDelReceptor, LocalDate fecha, String direccionDeReparto, Long total, boolean pendiente,
+                  Cliente cliente, List<Producto> productos){
         this.nombreDelReceptor = nombreDelReceptor;
         this.fecha = fecha;
         this.direccionDeReparto = direccionDeReparto;
         this.total = total;
         this.pendiente = pendiente;
+        this.cliente = cliente;
+        this.productos = new ArrayList<>();
     }
 
     @PrePersist
     private void prePersist() {
-        this.pendiente = 0;
+        this.pendiente = true;
     }
 
     public Long getIdPedido() {
@@ -92,12 +109,27 @@ public class Pedido implements Serializable {
         this.total = total;
     }
 
-    public int getPendiente() {
+    public boolean isPendiente() {
         return pendiente;
     }
 
-    public void setPendiente(int pendiente) {
+    public void setPendiente(boolean pendiente) {
         this.pendiente = pendiente;
     }
 
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public List<Producto> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(List<Producto> productos) {
+        this.productos = productos;
+    }
 }

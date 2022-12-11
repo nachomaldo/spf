@@ -1,7 +1,9 @@
 package cl.ubiobio.spf.Controller;
 
 import cl.ubiobio.spf.Entity.Pedido;
+import cl.ubiobio.spf.Entity.Producto;
 import cl.ubiobio.spf.Service.IPedidoService;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,16 @@ public class PedidoController {
         if (pedidoActualizado == null ) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(pedidoActualizado, HttpStatus.CREATED);
+    }
+
+    // compra rapida
+    @PutMapping("/rapida")
+    public ResponseEntity<?> compraRapida (@RequestBody Pedido pedido) {
+        List<Producto> productosRapida = pedidoService.rapida(pedido.getProductos());
+
+        if (productosRapida.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     // Eliminación física de un pedido
