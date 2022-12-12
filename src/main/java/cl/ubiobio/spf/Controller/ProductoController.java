@@ -4,13 +4,19 @@ import cl.ubiobio.spf.Entity.Producto;
 import cl.ubiobio.spf.Exception.InvalidParameterException;
 import cl.ubiobio.spf.Service.IProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.List;
 
@@ -103,4 +109,36 @@ public class ProductoController {
         }
         return response;
     }
+
+    @GetMapping("/imagenes/image/{nombreImagen:.+}")
+    public ResponseEntity<Resource> verImagen(@PathVariable String nombreImagen) throws MalformedURLException {
+
+        Path rutaArchivo = Paths.get("imagenes").resolve(nombreImagen).toAbsolutePath();
+
+        Resource recurso = null;
+
+        recurso = new UrlResource(rutaArchivo.toUri());
+
+        if (!recurso.exists() && !recurso.isReadable()) {
+            throw new RuntimeException("Error no se pudo cargar la imagen: " + nombreImagen);
+        }
+        HttpHeaders cabecera = new HttpHeaders();
+        cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
+
+        return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
+    }
+
+    /*    //Servicio web que recibe una imagen y un codigo, y la cual guarda como imagen de referencia para el producto que corresponde el codigo
+    @RequestMapping(value = "/imagen/{codigo}", method = RequestMethod.POST)
+    public ResponseEntity<Producto> uploadImagenReferencia (@RequestParam("file") MultipartFile file, @PathVariable Long codigo){
+        ResponseEntity<Producto> response;
+        try {
+            Producto productoImagen = productoService.imagenReferencia(file,codigo);
+            response = new ResponseEntity<Producto>(productoImagen, HttpStatus.OK);
+        } catch (Exception e){
+            e.printStackTrace();
+            response = new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }*/
 }

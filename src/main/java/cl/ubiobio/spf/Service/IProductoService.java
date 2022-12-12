@@ -29,7 +29,9 @@ public interface IProductoService {
     //Eliminar un producto
     void deleteProducto (Long codigo);
 
-    Producto imagenReferencia(MultipartFile file, Long id) throws IOException;
+/*    Producto imagenReferencia(MultipartFile file, Long id) throws IOException;*/
 
     Page<Producto> getProductos(Pageable pageable);
+
+    Producto imagenReferencia(MultipartFile file, Long codigo) throws IOException;
 }

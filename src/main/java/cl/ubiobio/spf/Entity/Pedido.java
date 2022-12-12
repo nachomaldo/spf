@@ -47,7 +47,7 @@ public class Pedido implements Serializable {
     private Cliente cliente;
 
     // Productos del pedido
-    //@JsonIgnoreProperties(value = {"pedido", "hibernateLazyInitializer", "handler"}, allowSetters = true)
+    @JsonIgnoreProperties(value = {"pedidos", "hibernateLazyInitializer", "handler"}, allowSetters = true)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "pedido_producto",

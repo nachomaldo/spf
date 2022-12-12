@@ -16,6 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -95,10 +98,26 @@ public class ProductoService implements IProductoService {
     @Override
     @Transactional
     public void deleteProducto(Long codigo) {
+
+        Producto producto = productoRepository.findById(codigo).orElse(null);
+        if (producto != null) {
+            String nombreImagenAnterior = producto.getImageName();
+
+            if (nombreImagenAnterior != null && nombreImagenAnterior.length() > 0) {
+                Path rutaImagenAnterior = Paths.get("imagenes").resolve(nombreImagenAnterior).toAbsolutePath();
+                File archivoImagenAnterior = rutaImagenAnterior.toFile();
+                if (archivoImagenAnterior.exists() && archivoImagenAnterior.canRead()) {
+                    archivoImagenAnterior.delete();
+                }
+            }
+        }
+
         productoRepository.deleteById(codigo);
     }
 
-    @Override
+
+
+/*    @Override
     public Producto imagenReferencia(MultipartFile file, Long id) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         Producto producto = productoRepository.findById(id).orElse(null);
@@ -116,12 +135,41 @@ public class ProductoService implements IProductoService {
         }else{
             throw new FacilitoException("Error guardando archivo, tipo de archivo no soportado");
         }
+    }*/
+
+    @Override
+    public Producto imagenReferencia(MultipartFile file, Long codigo) throws IOException {
+        Producto producto = productoRepository.findById(codigo).orElse(null);
+
+        if (!file.isEmpty()) {
+            String nombreArchivo = file.getOriginalFilename();
+            Path pathFile = Paths.get("imagenes").resolve(nombreArchivo).toAbsolutePath();
+
+            Files.copy(file.getInputStream(), pathFile);
+
+            String nombreImagenAnterior = producto.getImageName();
+
+            if (nombreImagenAnterior != null && nombreImagenAnterior.length() > 0) {
+                Path rutaImagenAnterior = Paths.get("imagenes").resolve(nombreImagenAnterior).toAbsolutePath();
+                File archivoImagenAnterior = rutaImagenAnterior.toFile();
+                if (archivoImagenAnterior.exists() && archivoImagenAnterior.canRead()) {
+                    archivoImagenAnterior.delete();
+                }
+            }
+
+            producto.setImageName(nombreArchivo);
+            return productoRepository.save(producto);
+        }
+
+        return null;
     }
 
     @Override
     public Page<Producto> getProductos(Pageable pageable) {
         return productoRepository.findAll(pageable);
     }
+
+
 
 
 }

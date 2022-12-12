@@ -36,24 +36,24 @@ public class Producto implements Serializable {
 
     private String imageName;
 
-    @Lob
-    private byte[] imageBytes;
+   /* @Lob
+    private byte[] imageBytes;*/
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "productos")
     private List<Pedido> pedidos;
 
     public Producto(){}
 
-    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria, String imageName,
-                    byte[] imageBytes) {
+    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria, String imageName, List<Pedido> pedidos) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
         this.descripcion = descripcion;
         this.categoria = categoria;
         this.imageName = imageName;
-        this.imageBytes = imageBytes;
+        this.pedidos = pedidos;
     }
+
 
     public Long getCodigo() {
         return codigo;
@@ -107,11 +107,19 @@ public class Producto implements Serializable {
         this.imageName = imageName;
     }
 
-    public byte[] getImageBytes() {
+    public List<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
+
+/*    public byte[] getImageBytes() {
         return imageBytes;
     }
 
     public void setImageBytes(byte[] imageBytes) {
         this.imageBytes = imageBytes;
-    }
+    }*/
 }
