@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +29,7 @@ public class ProductoController {
     private IProductoService productoService;
 
     // Crear un nuevo producto
+    @Secured("ROLE_OPERADOR")
     @PostMapping("")
     public ResponseEntity<Producto> createProducto(@RequestBody Producto producto) throws ParseException {
         if (producto != null) {
@@ -38,6 +40,7 @@ public class ProductoController {
     }
 
     // Obtener un producto específico
+    @Secured("ROLE_OPERADOR")
     @GetMapping("/{codigo}")
     public ResponseEntity<Producto> getProducto (@PathVariable(value = "codigo") Long codigo){
         Producto productoEncontrado = productoService.getProducto(codigo);
@@ -49,6 +52,7 @@ public class ProductoController {
     }
 
     // Obtener todos los productos
+    @Secured("ROLE_OPERADOR")
     @GetMapping("/get/{pageNumber}")
     public ResponseEntity<Page<Producto>> getProductos (@PathVariable(value = "pageNumber") Integer nroPagina){
         Page pageOfProductos =  productoService.getProductos(PageRequest.of(nroPagina, 5));
@@ -59,6 +63,7 @@ public class ProductoController {
     }
 
     // Obtener producto por categoria, paginados
+    @Secured("ROLE_OPERADOR")
     @GetMapping("/get/{categoria}/{pageNumber}")
     public ResponseEntity<Page<Producto>> getProductoPorCategoria(@PathVariable(value = "categoria") String categoria,
                                                                   @PathVariable(value = "pageNumber") Integer nroPagina) {
@@ -79,6 +84,7 @@ public class ProductoController {
     }*/
 
     // Actualizar un producto
+    @Secured("ROLE_OPERADOR")
     @PutMapping("/update/{codigo}")
     public ResponseEntity<Producto> updateProducto (@RequestBody Producto producto,
                                                     @PathVariable(value = "codigo") Long codigo) {
@@ -90,6 +96,7 @@ public class ProductoController {
     }
 
     // Eliminación física de un producto
+    @Secured("ROLE_OPERADOR")
     @DeleteMapping("/delete/{codigo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProducto (@PathVariable(value = "codigo") Long codigo) {
@@ -97,6 +104,7 @@ public class ProductoController {
     }
 
     //Servicio web que recibe una imagen y un codigo, y la cual guarda como imagen de referencia para el producto que corresponde el codigo
+    @Secured("ROLE_OPERADOR")
     @RequestMapping(value = "/imagen/{codigo}", method = RequestMethod.POST)
     public ResponseEntity<Producto> uploadImagenReferencia (@RequestParam("file") MultipartFile file, @PathVariable Long codigo){
         ResponseEntity<Producto> response;
@@ -109,6 +117,7 @@ public class ProductoController {
         }
         return response;
     }
+
 
     @GetMapping("/imagenes/image/{nombreImagen:.+}")
     public ResponseEntity<Resource> verImagen(@PathVariable String nombreImagen) throws MalformedURLException {

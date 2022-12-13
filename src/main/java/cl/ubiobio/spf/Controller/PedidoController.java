@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ public class PedidoController {
     private IPedidoService pedidoService;
 
     // Crear un nuevo pedido
+    @Secured("ROLE_OPERADOR")
     @PostMapping("")
     public ResponseEntity<Pedido> createPedido(@RequestBody Pedido pedido) throws ParseException {
         if (pedido != null) {
@@ -36,6 +38,7 @@ public class PedidoController {
     }
 
     // Obtener un pedido específico
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/{idPedido}")
     public ResponseEntity<Pedido> getPedido (@PathVariable(value = "idPedido") Long idPedido){
         Pedido pedidoEncontrado = pedidoService.getPedido(idPedido);
@@ -47,6 +50,7 @@ public class PedidoController {
     }
 
     // Obtener Pedidos por fecha
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/{fecha}")
     public ResponseEntity<List<Pedido>> getPedidoPorFecha(@PathVariable(value = "fecha") String fecha) {
         LocalDate localDate = LocalDate.parse(fecha);
@@ -56,6 +60,7 @@ public class PedidoController {
     }
 
     // Actualizar un pedido
+    @Secured("ROLE_OPERADOR")
     @PutMapping("/update/{idPedido}")
     public ResponseEntity<Pedido> updatePedido (@RequestBody Pedido pedido,
                                                 @PathVariable(value = "idPedido") Long idPedido) {
@@ -67,6 +72,7 @@ public class PedidoController {
     }
 
     // compra rapida
+    @Secured("ROLE_OPERADOR")
     @PutMapping("/rapida")
     public ResponseEntity<?> compraRapida (@RequestBody Pedido pedido) {
         List<Producto> productosRapida = pedidoService.rapida(pedido.getProductos());
@@ -76,6 +82,7 @@ public class PedidoController {
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @Secured("ROLE_OPERADOR")
     // Eliminación física de un pedido
     @DeleteMapping("/delete/{idPedido}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -5,6 +5,7 @@ import cl.ubiobio.spf.Service.IDeudaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -16,6 +17,7 @@ public class DeudaController {
     @Autowired
     private IDeudaService deudaService;
 
+    @Secured("ROLE_OPERADOR")
     @PostMapping("")
     public ResponseEntity<Deuda> CreateDeuda(@RequestBody Deuda deuda) throws ParseException {
         if (deuda != null) {
@@ -25,6 +27,7 @@ public class DeudaController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/{idDeuda}")
     public ResponseEntity<Deuda> getDeuda (@PathVariable(value = "idDeuda") Long idDeuda){
         Deuda deudaEncontrada = deudaService.getDeuda(idDeuda);
@@ -35,6 +38,7 @@ public class DeudaController {
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Secured("ROLE_OPERADOR")
     @PutMapping("/update/{idDeuda}")
     public ResponseEntity<Deuda> updateDeuda (@RequestBody Deuda deuda,
                                               @PathVariable(value = "idDeuda") Long idDeuda) {
@@ -45,6 +49,7 @@ public class DeudaController {
             return new ResponseEntity<>(deudaActualizada, HttpStatus.CREATED);
     }
 
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @PutMapping("/vigente/{idDeuda}")
     public void vigente (@PathVariable(value = "idDeuda") Long idDeuda) { deudaService.vigenteDeuda(idDeuda);}
 }

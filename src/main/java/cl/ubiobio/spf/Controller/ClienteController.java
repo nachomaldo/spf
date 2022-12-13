@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,7 +26,7 @@ public class ClienteController {
     private IClienteService clienteService;
 
     // Crear un nuevo cliente
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @PostMapping("")
     public ResponseEntity<Cliente> saveCliente (@Valid @RequestBody Cliente cliente) {
         if (cliente != null) {
@@ -36,7 +37,7 @@ public class ClienteController {
     }
 
     // Obtener un cliente por su ID
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/{idCliente}")
     public ResponseEntity<Cliente> getCliente (@PathVariable(value = "idCliente") Long idCliente) {
         if (idCliente == null || idCliente == 0) throw new InvalidIdException("El ID del cliente ingresado no es válido.");
@@ -51,7 +52,7 @@ public class ClienteController {
     }
 
     // Obtener todos los clientes activos, paginados
-   // @Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/page/{pageNumber}")
     public ResponseEntity<Page<Cliente>> getClientes (@PathVariable(value = "pageNumber") Integer nroPagina) {
         Page pageOfClientes = clienteService.getClientesActivos(PageRequest.of(nroPagina, 5));
@@ -62,7 +63,7 @@ public class ClienteController {
     }
 
     // Obtener todos los clientes inactivos, paginados
-    //@Secured("ROLE_PSICOLOGO_TRATANTE")
+    //@Secured("ROLE_OPERADOR")
     @GetMapping("/get/inactive/page/{pageNumber}")
     public ResponseEntity<Page<Cliente>> getClientesInactivos (@PathVariable(value = "pageNumber") Integer nroPagina) {
         Page inactiveClientes = clienteService.getClientesInactivos(PageRequest.of(nroPagina, 5));
@@ -73,7 +74,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes activos, por nombre, sin paginar
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/by-name")
     public ResponseEntity<List<Cliente>> getClientesPorNombreSinPaginar (@RequestParam String nombre) {
         if (nombre == null) throw new InvalidParameterException("Se debe ingresar el nombre del cliente.");
@@ -86,7 +87,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes inactivos, por nombre, sin paginar
-   //@Secured("ROLE_PSICOLOGO_TRATANTE")
+   //@Secured("ROLE_OPERADOR")
     @GetMapping("/get/inactive/by-name")
     public ResponseEntity<List<Cliente>> getClientesInactivosPorNombre(@RequestParam String nombre) {
 
@@ -100,7 +101,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes inactivos, por apellido, sin paginar
-    //@Secured("ROLE_PSICOLOGO_TRATANTE")
+    //@Secured("ROLE_OPERADOR", "ROLE_REPARTIDOR")
     @GetMapping("/get/inactive/by-lastname")
     public ResponseEntity<List<Cliente>> getClientesInactivosPorApellido(@RequestParam String apellido) {
         if (apellido == null) throw new InvalidParameterException("Se debe ingresar un apellido.");
@@ -113,7 +114,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes inactivos, por nombre y apellido, sin paginar
-    //@Secured("ROLE_PSICOLOGO_TRATANTE")
+    //@Secured("ROLE_OPERADOR")
     @GetMapping("/get/inactive/by-name-lastname")
     public ResponseEntity<List<Cliente>> getClientesInactivosPorNombreApellido(@RequestParam String nombre,
                                                                                  @RequestParam String apellido) {
@@ -127,7 +128,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes activos, por apellido, sin paginar
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    //@Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/by-lastname")
     public ResponseEntity<List<Cliente>> getClientesPorApellidoSinPaginar (@RequestParam String apellido) {
         if (apellido != null) {
@@ -142,7 +143,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes activos, por nombre y apellido, sin paginar
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    //@Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/by-name-lastname")
     public ResponseEntity<List<Cliente>> getPacientesPorNombreApellidoSinPaginar(@RequestParam String nombre, @RequestParam String apellido) {
         if (nombre != null && apellido != null) {
@@ -157,7 +158,7 @@ public class ClienteController {
     }
 
     // Actualizar los datos de un cliente
-    //@Secured({"ROLE_PSICOLOGO_TRATANTE", "ROLE_COLABORADOR"})
+    @Secured("ROLE_OPERADOR")
     @PutMapping("/update/{idCliente}")
     public ResponseEntity<Cliente> updateCliente (@Valid @RequestBody Cliente cliente, @PathVariable (value = "idCliente") Long idCliente) {
         if (idCliente == null || idCliente == 0) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -171,7 +172,7 @@ public class ClienteController {
     }
 
     // Eliminación lógica de un cliente
-    //@Secured("ROLE_PSICOLOGO_TRATANTE")
+    //@Secured("ROLE_OPERADOR",)
     @PutMapping("delete/{idCliente}")
     public ResponseEntity<Cliente> deleteCliente(@PathVariable(value = "idCliente") Long idCliente) {
         if (idCliente == null || idCliente == 0) {
@@ -186,7 +187,7 @@ public class ClienteController {
     }
 
     // Reintegrar un cliente(de INACTIVO a ACTIVO)
-    //@Secured("ROLE_PSICOLOGO_TRATANTE")
+    //@Secured("ROLE_OPERADOR")
     @PutMapping("integrate/{idCliente}")
     public ResponseEntity<Cliente> reintegrarPaciente(@PathVariable(value = "idCliente") Long idCliente) {
         if (idCliente == null || idCliente == 0) throw new InvalidIdException("Se debe ingresar un identificador válido.");
