@@ -34,6 +34,8 @@ public class Producto implements Serializable {
     @Size(min = 3, max = 30)
     private String categoria;
 
+    private String estado;
+
     private String imageName;
 
    /* @Lob
@@ -44,16 +46,21 @@ public class Producto implements Serializable {
 
     public Producto(){}
 
-    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria, String imageName, List<Pedido> pedidos) {
+    public Producto(String nombre, Long precio, Long stock, String descripcion, String categoria, String estado, String imageName, List<Pedido> pedidos) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
         this.descripcion = descripcion;
         this.categoria = categoria;
+        this.estado = estado;
         this.imageName = imageName;
         this.pedidos = pedidos;
     }
 
+    @PrePersist
+    private void PrePersist() {
+        this.estado = "Activo";
+    }
 
     public Long getCodigo() {
         return codigo;
@@ -115,7 +122,30 @@ public class Producto implements Serializable {
         this.pedidos = pedidos;
     }
 
-/*    public byte[] getImageBytes() {
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    @Override
+    public String toString() {
+        return "Producto{" +
+                "codigo=" + codigo +
+                ", nombre='" + nombre + '\'' +
+                ", precio=" + precio +
+                ", stock=" + stock +
+                ", descripcion='" + descripcion + '\'' +
+                ", categoria='" + categoria + '\'' +
+                ", estado='" + estado + '\'' +
+                ", imageName='" + imageName + '\'' +
+                ", pedidos=" + pedidos +
+                '}';
+    }
+
+    /*    public byte[] getImageBytes() {
         return imageBytes;
     }
 

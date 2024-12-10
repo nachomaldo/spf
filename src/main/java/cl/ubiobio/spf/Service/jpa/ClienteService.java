@@ -1,6 +1,8 @@
 package cl.ubiobio.spf.Service.jpa;
 
 import cl.ubiobio.spf.Entity.Cliente;
+import cl.ubiobio.spf.Entity.Deuda;
+import cl.ubiobio.spf.Exception.ResourceDeletionNotPossibleException;
 import cl.ubiobio.spf.Repository.IClienteRepository;
 import cl.ubiobio.spf.Service.IClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,6 +128,10 @@ public class ClienteService implements IClienteService {
             return null;
         }
 
+        for (Deuda deuda : clienteToDelete.getDeudas()) {
+            if (deuda.isVigente()) throw new ResourceDeletionNotPossibleException("El cliente presenta deudas vigentes, por lo que no es posible eliminarlo.");
+        }
+
 /* Pendiente tratar los pedidos relacionados al cliente
         if (!clienteToDelete.getPedidos().isEmpty()) {
             for (Pedido pedido : clienteToDelete.getPedidos()) {
@@ -140,24 +146,6 @@ public class ClienteService implements IClienteService {
 
             // Se setea como 'Inactivo' al cliente
             clienteToDelete.setEstado("Inactivo");
-
-            /*
-            // Eliminación lógica de su anamnesis
-            if (patientToDelete.getAnamnesis() != null) patientToDelete.getAnamnesis().setEstado("Inactivo");
-
-            // Eliminación lógica de su ficha de tratamiento
-            if (patientToDelete.getFichaTratamiento() != null) {
-                patientToDelete.getFichaTratamiento().setEstado("Inactivo");
-
-                // Se setean como inactivas las sesiones de terapia que tenga que el paciente
-                if (patientToDelete.getFichaTratamiento().getSesionesDeTerapia().size() > 0 || patientToDelete.getFichaTratamiento().getSesionesDeTerapia() != null) {
-                    for (SesionTerapia sesion : patientToDelete.getFichaTratamiento().getSesionesDeTerapia()) {
-                        sesion.setEstado("Inactivo");
-                    }
-                }
-            }
-            */
-
             // Se guardan los cambios y se retorna el paciente eliminado
             return clienteRepository.save(clienteToDelete);
         }

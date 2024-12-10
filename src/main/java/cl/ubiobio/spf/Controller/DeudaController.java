@@ -49,7 +49,14 @@ public class DeudaController {
             return new ResponseEntity<>(deudaActualizada, HttpStatus.CREATED);
     }
 
-    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
+    /*@Secured("ROLE_OPERADOR")
     @PutMapping("/vigente/{idDeuda}")
-    public void vigente (@PathVariable(value = "idDeuda") Long idDeuda) { deudaService.vigenteDeuda(idDeuda);}
+    public ResponseEntity<Deuda> vigente (@PathVariable(value = "idDeuda") Long idDeuda) {
+
+        Deuda deudaActualizada = deudaService.vigenteDeuda(idDeuda);
+
+        if (deudaActualizada == null ) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else
+            return new ResponseEntity<>(deudaActualizada, HttpStatus.OK);
+    }*/
 }

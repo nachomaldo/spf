@@ -16,5 +16,5 @@ public interface IDeudaService {
     Deuda updateDeuda (Deuda deuda, Long idDeuda);
 
     //Cambiar estado vigente de una deuda
-    void vigenteDeuda (Long idDeuda);
+    //Deuda vigenteDeuda (Long idDeuda);
 }

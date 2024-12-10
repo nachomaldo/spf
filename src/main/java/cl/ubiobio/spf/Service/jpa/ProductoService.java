@@ -1,17 +1,17 @@
 package cl.ubiobio.spf.Service.jpa;
 
+import cl.ubiobio.spf.Entity.Cliente;
+import cl.ubiobio.spf.Entity.Deuda;
 import cl.ubiobio.spf.Entity.Producto;
-import cl.ubiobio.spf.Exception.FacilitoException;
+import cl.ubiobio.spf.Exception.ResourceDeletionNotPossibleException;
 import cl.ubiobio.spf.Repository.IProductoRepository;
 import cl.ubiobio.spf.Service.IProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -46,8 +46,51 @@ public class ProductoService implements IProductoService {
     // Obtener productos por una categoria determinada
     @Override
     @Transactional(readOnly = true)
-    public Page<Producto> getProductosPorCategoria(String categoria, Pageable pageable) {
-        return productoRepository.findByCategoriaOrderByPrecioAsc(categoria, pageable);
+    public Page<Producto> getProductosPorCategoria(String estado, String categoria, Pageable pageable) {
+        return productoRepository.findByEstadoAndCategoriaOrderByPrecioAsc(estado, categoria, pageable);
+    }
+
+    // Obtener uno o más productos por nombre y estado, sin paginar
+    @Override
+    @Transactional(readOnly = true)
+    public List<Producto> getProductosPorEstadoPorNombreSinPaginar(String estado, String name) {
+        if (name != null) return productoRepository.findAllByEstadoAndNombreContaining(estado, name);
+        else
+            return null;
+    }
+
+    @Override
+    public Producto logicDelete(Long idProducto) {
+        Producto productToDelete = getProducto(idProducto);
+
+        if (productToDelete.getEstado().equalsIgnoreCase("Inactivo")) {
+            return null;
+        }
+
+        if (productToDelete != null) {
+
+            // Se setea como 'Inactivo' el producto
+            productToDelete.setEstado("Inactivo");
+            // Se guardan los cambios y se retorna el paciente eliminado
+            return productoRepository.save(productToDelete);
+        }
+        else
+            return null;
+    }
+
+    // Reintegrar un producto (estado de "Inactivo" a "Activo")
+    @Override
+    public Producto reintegrarProducto(Long codigo) {
+        Producto productoToIntegrate = getProducto(codigo);
+
+        if (productoToIntegrate != null) {
+            // Se reintegra el producto
+            productoToIntegrate.setEstado("Activo");
+            // Se guardan los cambios
+            return productoRepository.save(productoToIntegrate);
+        }
+        else
+            return null;
     }
 
     /*@Override
@@ -94,29 +137,27 @@ public class ProductoService implements IProductoService {
         catch (NullPointerException e) { return null; }
     }
 
-    // Eliminar un pedido (ELIMINACIÓN FÍSICA)
+    // Eliminar un producto (lógica)
     @Override
     @Transactional
-    public void deleteProducto(Long codigo) {
+    public Producto deleteProducto(Long codigo) {
+        Producto productoToDelete = getProducto(codigo);
 
-        Producto producto = productoRepository.findById(codigo).orElse(null);
-        if (producto != null) {
-            String nombreImagenAnterior = producto.getImageName();
-
-            if (nombreImagenAnterior != null && nombreImagenAnterior.length() > 0) {
-                Path rutaImagenAnterior = Paths.get("imagenes").resolve(nombreImagenAnterior).toAbsolutePath();
-                File archivoImagenAnterior = rutaImagenAnterior.toFile();
-                if (archivoImagenAnterior.exists() && archivoImagenAnterior.canRead()) {
-                    archivoImagenAnterior.delete();
-                }
-            }
+        if (productoToDelete.getEstado().equalsIgnoreCase("Inactivo")) {
+            return null;
         }
+        if (codigo != null) {
 
-        productoRepository.deleteById(codigo);
+            // Se setea como 'Inactivo' al cliente
+            productoToDelete.setEstado("Inactivo");
+            // Se guardan los cambios y se retorna el paciente eliminado
+            return productoRepository.save(productoToDelete);
+        }
+        else
+            return null;
     }
 
-
-
+    // Eliminar un pedido (ELIMINACIÓN FÍSICA)
 /*    @Override
     public Producto imagenReferencia(MultipartFile file, Long id) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -169,7 +210,14 @@ public class ProductoService implements IProductoService {
         return productoRepository.findAll(pageable);
     }
 
+    @Override
+    public Page<Producto> getProductosActivosPaginados(String estado, Pageable pageable) {
+        return productoRepository.findAllByEstado(estado, pageable);
+    }
 
-
+    @Override
+    public Page<Producto> getProductosInactivosPaginados(String estado, Pageable pageable) {
+        return productoRepository.findAllByEstado(estado, pageable);
+    }
 
 }

@@ -26,13 +26,11 @@ public class PedidoService implements IPedidoService {
     @Transactional
     public Pedido savePedido(Pedido pedido) {
         if (pedido != null) {
+            /*List<Pedido> totalPedidosAgendados = getPedidosPorFecha(pedido.getFecha());
 
-            List<Pedido> totalPedidosAgendados = getPedidosPorFecha(pedido.getFecha());
-
-            if (totalPedidosAgendados.size()>=5) {
+            if (totalPedidosAgendados.size()>=limitePedido) {
                 return null;
-            }
-
+            }*/
             return pedidoRepository.save(pedido);
         } else
             return null;

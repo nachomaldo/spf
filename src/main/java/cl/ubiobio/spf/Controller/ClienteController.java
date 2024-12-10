@@ -3,6 +3,7 @@ package cl.ubiobio.spf.Controller;
 import cl.ubiobio.spf.Entity.Cliente;
 import cl.ubiobio.spf.Exception.InvalidIdException;
 import cl.ubiobio.spf.Exception.InvalidParameterException;
+import cl.ubiobio.spf.Exception.ResourceDeletionNotPossibleException;
 import cl.ubiobio.spf.Exception.ResourceNotFoundException;
 import cl.ubiobio.spf.Service.IClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class ClienteController {
     private IClienteService clienteService;
 
     // Crear un nuevo cliente
-    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
+    @Secured("ROLE_OPERADOR")
     @PostMapping("")
     public ResponseEntity<Cliente> saveCliente (@Valid @RequestBody Cliente cliente) {
         if (cliente != null) {
@@ -62,8 +63,9 @@ public class ClienteController {
             throw new InvalidParameterException("El número de página proporcionado no es válido.");
     }
 
+
     // Obtener todos los clientes inactivos, paginados
-    //@Secured("ROLE_OPERADOR")
+    @Secured("ROLE_OPERADOR")
     @GetMapping("/get/inactive/page/{pageNumber}")
     public ResponseEntity<Page<Cliente>> getClientesInactivos (@PathVariable(value = "pageNumber") Integer nroPagina) {
         Page inactiveClientes = clienteService.getClientesInactivos(PageRequest.of(nroPagina, 5));
@@ -72,6 +74,7 @@ public class ClienteController {
         else
             throw new InvalidParameterException("El número de página proporcionado no es válido.");
     }
+
 
     // Obtener uno o más clientes activos, por nombre, sin paginar
     @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
@@ -87,7 +90,7 @@ public class ClienteController {
     }
 
     // Obtener uno o más clientes inactivos, por nombre, sin paginar
-   //@Secured("ROLE_OPERADOR")
+    @Secured("ROLE_OPERADOR")
     @GetMapping("/get/inactive/by-name")
     public ResponseEntity<List<Cliente>> getClientesInactivosPorNombre(@RequestParam String nombre) {
 
@@ -99,7 +102,7 @@ public class ClienteController {
         else
             throw new ResourceNotFoundException("No se ha encontrado un cliente con el nombre ingresado.");
     }
-
+    /*
     // Obtener uno o más clientes inactivos, por apellido, sin paginar
     //@Secured("ROLE_OPERADOR", "ROLE_REPARTIDOR")
     @GetMapping("/get/inactive/by-lastname")
@@ -145,7 +148,7 @@ public class ClienteController {
     // Obtener uno o más clientes activos, por nombre y apellido, sin paginar
     //@Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/by-name-lastname")
-    public ResponseEntity<List<Cliente>> getPacientesPorNombreApellidoSinPaginar(@RequestParam String nombre, @RequestParam String apellido) {
+    public ResponseEntity<List<Cliente>> getClientesPorNombreApellidoSinPaginar(@RequestParam String nombre, @RequestParam String apellido) {
         if (nombre != null && apellido != null) {
             List<Cliente> clientesByNameAndLastname = clienteService.getClientesPorEstadoPorNombreApellidoSinPaginar("Activo", nombre, apellido);
 
@@ -156,7 +159,7 @@ public class ClienteController {
         else
             throw new InvalidParameterException("Se debe ingresar el nombre y el apellido.");
     }
-
+*/
     // Actualizar los datos de un cliente
     @Secured("ROLE_OPERADOR")
     @PutMapping("/update/{idCliente}")
@@ -172,24 +175,34 @@ public class ClienteController {
     }
 
     // Eliminación lógica de un cliente
-    //@Secured("ROLE_OPERADOR",)
-    @PutMapping("delete/{idCliente}")
-    public ResponseEntity<Cliente> deleteCliente(@PathVariable(value = "idCliente") Long idCliente) {
-        if (idCliente == null || idCliente == 0) {
-            throw new InvalidIdException("Se debe ingresar un identificador válido.");
+    @Secured("ROLE_OPERADOR")
+    @PutMapping("/delete/{idCliente}")
+    public ResponseEntity<?> deleteCliente(@PathVariable(value = "idCliente") Long idCliente) {
+
+        try {
+            if (idCliente == null || idCliente == 0) {
+                throw new InvalidIdException("Se debe ingresar un identificador válido.");
+            }
+
+            Cliente clienteToDelete = clienteService.deleteCliente(idCliente);
+
+            if (clienteToDelete != null) return new ResponseEntity<>(clienteToDelete, HttpStatus.OK);
+            else
+                throw new ResourceNotFoundException("El identificador del cliente ingresado no se encuentra registrado en el sistema.");
         }
-
-        Cliente clienteToDelete = clienteService.deleteCliente(idCliente);
-
-        if (clienteToDelete != null) return new ResponseEntity<>(clienteToDelete, HttpStatus.OK);
-        else
-            throw new ResourceNotFoundException("El identificador del cliente ingresado no se encuentra registrado en el sistema.");
+        catch (InvalidIdException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (ResourceNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
+
     // Reintegrar un cliente(de INACTIVO a ACTIVO)
-    //@Secured("ROLE_OPERADOR")
+    @Secured("ROLE_OPERADOR")
     @PutMapping("integrate/{idCliente}")
-    public ResponseEntity<Cliente> reintegrarPaciente(@PathVariable(value = "idCliente") Long idCliente) {
+    public ResponseEntity<Cliente> reintegrarCliente(@PathVariable(value = "idCliente") Long idCliente) {
         if (idCliente == null || idCliente == 0) throw new InvalidIdException("Se debe ingresar un identificador válido.");
 
         Cliente clienteToIntegrate = clienteService.reintegrarCliente(idCliente);

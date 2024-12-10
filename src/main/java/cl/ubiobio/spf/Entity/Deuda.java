@@ -21,8 +21,7 @@ public class Deuda implements Serializable {
 
     // true = VIGENTE
     // false = CANCELADA
-    @NotNull
-    @Column(name = "pendiente")
+    @Column(name = "vigente")
     private boolean vigente;
 
     @NotEmpty
@@ -36,7 +35,7 @@ public class Deuda implements Serializable {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    @JsonIgnoreProperties({"pedidos", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"deudas", "hibernateLazyInitializer", "handler"})
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente")
@@ -50,6 +49,15 @@ public class Deuda implements Serializable {
         this.monto = monto;
         this.fecha = fecha;
         this.cliente = cliente;
+    }
+
+    @PrePersist
+    private void prePersist() {
+        this.vigente = true;
+    }
+
+    public Long getIdDeuda() {
+        return idDeuda;
     }
 
     public boolean isVigente() {
@@ -90,5 +98,17 @@ public class Deuda implements Serializable {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    @Override
+    public String toString() {
+        return "Deuda{" +
+                "idDeuda=" + idDeuda +
+                ", vigente=" + vigente +
+                ", motivo='" + motivo + '\'' +
+                ", monto=" + monto +
+                ", fecha=" + fecha +
+                ", cliente=" + cliente +
+                '}';
     }
 }

@@ -2,8 +2,9 @@ package cl.ubiobio.spf.Controller;
 
 import cl.ubiobio.spf.Entity.Pedido;
 import cl.ubiobio.spf.Entity.Producto;
+import cl.ubiobio.spf.Exception.InvalidIdException;
+import cl.ubiobio.spf.Exception.InvalidParameterException;
 import cl.ubiobio.spf.Service.IPedidoService;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,8 @@ public class PedidoController {
             Pedido pedidoCreado = pedidoService.savePedido(pedido);
 
             // Si la cantidad de pedidos supera el maximo diario
-            if (pedidoCreado == null) return new ResponseEntity<>(HttpStatus.CONFLICT);
-            else
+            //if (pedidoCreado == null) return new ResponseEntity<>(HttpStatus.CONFLICT);
+            //else
                 return new ResponseEntity<>(pedidoCreado, HttpStatus.CREATED);
         } else
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -41,6 +42,10 @@ public class PedidoController {
     @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/{idPedido}")
     public ResponseEntity<Pedido> getPedido (@PathVariable(value = "idPedido") Long idPedido){
+        if (idPedido == null || idPedido == 0) {
+            throw new  InvalidIdException("El ID del horario de atención ingresado no es valido");
+        }
+
         Pedido pedidoEncontrado = pedidoService.getPedido(idPedido);
 
         if (pedidoEncontrado != null) {
@@ -53,6 +58,8 @@ public class PedidoController {
     @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @GetMapping("/get/{fecha}")
     public ResponseEntity<List<Pedido>> getPedidoPorFecha(@PathVariable(value = "fecha") String fecha) {
+        if (fecha == null) throw new InvalidParameterException("Debe ingresar una fecha para realizar la búsqueda.");
+
         LocalDate localDate = LocalDate.parse(fecha);
         List<Pedido> pedidos = pedidoService.getPedidosPorFecha(localDate);
 
@@ -60,26 +67,34 @@ public class PedidoController {
     }
 
     // Actualizar un pedido
-    @Secured("ROLE_OPERADOR")
+    @Secured({"ROLE_OPERADOR", "ROLE_REPARTIDOR"})
     @PutMapping("/update/{idPedido}")
     public ResponseEntity<Pedido> updatePedido (@RequestBody Pedido pedido,
                                                 @PathVariable(value = "idPedido") Long idPedido) {
-        Pedido pedidoActualizado = pedidoService.updatePedido(pedido, idPedido);
+        if (pedido != null && idPedido != null && idPedido != 0){
 
-        if (pedidoActualizado == null ) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else
-            return new ResponseEntity<>(pedidoActualizado, HttpStatus.CREATED);
+            Pedido pedidoActualizado = pedidoService.updatePedido(pedido, idPedido);
+
+            if (pedidoActualizado == null ) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            else
+                return new ResponseEntity<>(pedidoActualizado, HttpStatus.CREATED);
+        }
+        else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     // compra rapida
     @Secured("ROLE_OPERADOR")
     @PutMapping("/rapida")
     public ResponseEntity<?> compraRapida (@RequestBody Pedido pedido) {
-        List<Producto> productosRapida = pedidoService.rapida(pedido.getProductos());
 
-        if (productosRapida.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        if (pedido != null) {
+            List<Producto> productosRapida = pedidoService.rapida(pedido.getProductos());
+
+            if (productosRapida.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            else
+                return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
     }
 
     @Secured("ROLE_OPERADOR")
@@ -87,6 +102,8 @@ public class PedidoController {
     @DeleteMapping("/delete/{idPedido}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePedido (@PathVariable(value = "idPedido") Long idPedido) {
+        if (idPedido == null || idPedido == 0) throw new InvalidIdException("El ID de la atención proporcionado no es valido");
+
         pedidoService.deletePedido(idPedido);
     }
 }

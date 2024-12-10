@@ -149,4 +149,21 @@ public class Cliente implements Serializable {
     public void setDeudas(List<Deuda> deudas) {
         this.deudas = deudas;
     }
+
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "idCliente=" + idCliente +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", telefono='" + telefono + '\'' +
+                ", direccion='" + direccion + '\'' +
+                ", email='" + email + '\'' +
+                ", estado='" + estado + '\'' +
+                ", pedidos=" + pedidos +
+                ", deudas=" + deudas +
+                '}';
+    }
+
+
 }

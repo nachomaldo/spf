@@ -132,4 +132,18 @@ public class Pedido implements Serializable {
     public void setProductos(List<Producto> productos) {
         this.productos = productos;
     }
+
+    @Override
+    public String toString() {
+        return "Pedido{" +
+                "idPedido=" + idPedido +
+                ", nombreDelReceptor='" + nombreDelReceptor + '\'' +
+                ", fecha=" + fecha +
+                ", direccionDeReparto='" + direccionDeReparto + '\'' +
+                ", total=" + total +
+                ", pendiente=" + pendiente +
+                ", cliente=" + cliente +
+                ", productos=" + productos +
+                '}';
+    }
 }

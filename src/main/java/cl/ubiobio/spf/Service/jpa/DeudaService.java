@@ -42,15 +42,20 @@ public class DeudaService implements IDeudaService {
             if (deudaToUpdate.getFecha() != deuda.getFecha()) deudaToUpdate.setFecha(deuda.getFecha()
             );
 
+            if (deudaToUpdate.isVigente() != deuda.isVigente()) deudaToUpdate.setVigente(deuda.isVigente()
+            );
+
             deudaRepository.save(deudaToUpdate);
             return deudaToUpdate;
         }
         catch (NullPointerException e) { return null; }
     }
 
-    @Override
-    public void vigenteDeuda(Long idDeuda) {
+    /*@Override
+    public Deuda vigenteDeuda(Long idDeuda) {
         Deuda deuda = getDeuda(idDeuda);
         deuda.setVigente(!deuda.isVigente());
-    }
+
+        return deudaRepository.save(deuda);
+    }*/
 }
